@@ -811,6 +811,8 @@ const G={mode:'title',scr:0,t:0,killed:new Set(),taken:new Set(),joined:new Set(
 const P={x:128,y:96,dir:'down',hp:3,maxhp:3,ammo:0,copies:0,hasMachete:false,hasRifle:false,atkT:0,shootCd:0,inv:0,anim:0,moving:false,trail:[],kx:0,ky:0,hitSet:null};
 const FXON=!(typeof window!=='undefined'&&window.__TYL_TEST&&!window.__TYL_FX);
 let WORLD=null,MW=COLS,MH=ROWS,WW=W,WH=PH,TS=0,WLIGHTS=[],CAM={x:0,y:0},LT=null,TUFTW=null,healT=0;
+let STAINS=[], FL=[];
+const BLOOD=['#a3141a','#c8312b','#7a0f14','#e0372b','#5e0b10'];
 let MAP=SCREENS[0].map,enemies=[],pickups=[],bullets=[],parts=[],fx=[],npcs=[],boss=null,PRESS=[],SNAP=null,NEWF=null;
 let toastMsg='',toastT=0,E={i:0,pages:[]};
 const D={pages:[],i:0,shown:0,onEnd:null};
@@ -860,15 +862,15 @@ function playerCol(){ if(G.ep==='patagonia') return (G.pat&&G.pat.part===3)?COL.
 /* ============ EPISODIO: PLAZA LOREA 1909 ============ */
 function loreaHowTo(){
   startCard([
-    {h:'OBJETIVO',b:['Eres una obrera de ficción en la manifestación del 1 de mayo de 1909 en Buenos Aires. La policía carga: recoge las cinco banderas rojas caídas y sal de la plaza.']},
-    {h:'CONTROLES',b:['Mover: joystick o flechas.','No hay armas: aquí solo se esquiva.']},
-    {h:'CÓMO SE JUEGA',b:['Una franja roja avisa por dónde llegará la próxima carga a caballo. Cuando termine el aviso, cruzará toda la plaza.','Quédate en los huecos entre franjas y cruza detrás de cada carga. Cada vez llegan más seguidas.','Después tendrás que escabullirte por las calles hasta un local sindical. Cada bandera que levantas provoca una carga nueva. Y policías a pie te persiguen: no te quedes quieto, pero puedes atascarlos detrás de las cajas.']}
+    {h:'OBJETIVO',b:['Eres una obrera de ficción el 1 de mayo de 1909 en Buenos Aires. Recoge las cinco banderas rojas y sal de la plaza.','Relato inspirado en hechos reales; la obrera y sus compañeros son inventados.']},
+    {h:'CÓMO SE JUEGA',b:['Mover: joystick. No hay armas.','Una franja roja avisa por dónde llegará la carga a caballo. Quédate en los huecos y cruza detrás de cada una. Luego escapa por las calles hasta el local sindical.']}
+  
   ],()=>startLorea(),'TOCA PARA EMPEZAR');
 }
 function startLorea(){
   resetState(); G.ep='lorea'; G.flags.intro=true; P.hasMachete=false; P.hp=3; P.maxhp=3; P.copies=0; G.cg=null;
   loadScreen(35,[24,104],true); G.mode='play';
-  startDialog([['','BUENOS AIRES. 1 DE MAYO DE 1909.'],['','Una manifestación obrera, convocada por la FORA, marcha hacia la Plaza Lorea. Es un relato inspirado en hechos reales: la obrera y sus compañeros son inventados.'],['Obrera','Somos muchos. Hoy se nos tiene que oír.']]);
+  startDialog([['','BUENOS AIRES, 1 DE MAYO DE 1909. Manifestación obrera hacia la Plaza Lorea.']]);
 }
 const CG_H=[40,104,168], CG_V=[62,128,194,318,384,450];
 function cgSpawn(force){
@@ -974,16 +976,16 @@ function startLoreaEnd(){
 /* ============ EPISODIO: EL CARRUAJE 1909 ============ */
 function falconHowTo(){
   startCard([
-    {h:'OBJETIVO',b:['Eres Simón Radowitzky, un joven anarquista, en Buenos Aires en noviembre de 1909. Llega a la avenida sin que te vean antes de que pase el carruaje.']},
-    {h:'CONTROLES',b:['Mover: joystick o flechas.','Botón grande: lanzar, cuando estés en la avenida.']},
-    {h:'CÓMO SE JUEGA',b:['Evita los conos amarillos de los policías y llega antes de que acabe el tiempo.','En la avenida, una X marca dónde caerá lo que lances. Pulsa el botón cuando el carruaje esté por llegar a la X.','Ojo: algunos coches pasan vacíos. El bueno va con escolta de jinetes y adornos dorados.']}
+    {h:'OBJETIVO',b:['Eres Simón Radowitzky, joven anarquista, en noviembre de 1909. Llega a la avenida sin que te vean antes de que pase el carruaje.','Relato inspirado en hechos reales; el recorrido y los policías son inventados.']},
+    {h:'CÓMO SE JUEGA',b:['Mover: joystick. Botón grande: lanzar.','Evita los conos amarillos. Lanza cuando el carruaje llegue a la X. Algunos van vacíos; el bueno lleva escolta de jinetes.']}
+  
   ],()=>startFalcon(),'TOCA PARA EMPEZAR');
 }
 function startFalcon(){
   resetState(); G.ep='falcon'; G.flags.intro=true; P.hasMachete=false; P.hp=3; P.maxhp=3; P.copies=0; G.susMax=0;
   G.fk={timer:42*60,phaseB:false,car:null,bomb:null,done:0,ct:0,flash:0};
   loadScreen(39,[24,104],true); G.mode='play';
-  startDialog([['','BUENOS AIRES. NOVIEMBRE DE 1909.'],['','Seis meses después de la carga del 1 de mayo, el coronel Falcón vuelve en carruaje del funeral de Antonio Ballvé, director de la cárcel. Un joven anarquista lo espera en la ruta.'],['','Es un relato inspirado en hechos reales. El recorrido y los policías son inventados.'],['Simón','Que no me vean antes de tiempo.']]);
+  startDialog([['','BUENOS AIRES, NOVIEMBRE DE 1909. Un joven anarquista espera al coronel Falcón.']]);
 }
 function falconTick(){
   const fk=G.fk; if(!fk) return; G.susMax=0;
@@ -1066,13 +1068,13 @@ function startFalconEnd(){
 function startUshuaia(){
   resetState(); G.ep='ushuaia'; G.flags.intro=true; P.hasMachete=false; P.hp=3; P.maxhp=3; P.copies=0; G.susMax=0;
   loadScreen(28,[40,40],true); G.mode='play';
-  startDialog([['','USHUAIA, TIERRA DEL FUEGO. 7 DE NOVIEMBRE DE 1918.'],['','Simón Radowitzky está preso en el penal más austral de Argentina. Afuera, compañeros del periódico anarquista La Protesta preparan su fuga.'],['','Es un relato inspirado en hechos reales. Lo que ocurre dentro del penal está inventado.'],['Simón','Sin armas, sin llaves. Solo paciencia y buen ojo.']]);
+  startDialog([['','USHUAIA, 7 DE NOVIEMBRE DE 1918. Simón Radowitzky está preso en el penal.']]);
 }
 function ushHowTo(){
   startCard([
-    {h:'OBJETIVO',b:['Eres Simón Radowitzky, preso en el penal de Ushuaia. Consigue un uniforme, cruza la puerta y llega al muelle.']},
-    {h:'CONTROLES',b:['Mover: joystick o flechas.','Botón grande: hablar o abrir (PC: E y Z).','No hay armas: aquí no se pelea.']},
-    {h:'CÓMO SE JUEGA',b:['Cada celador tiene un cono de visión amarillo. Si estás dentro, la barra ATENCIÓN sube. Si se llena, te descubren.','Quieto, o detrás de muros y cajas, la barra baja. El uniforme te protege, pero solo hasta que suene la alarma.']}
+    {h:'OBJETIVO',b:['Eres Simón Radowitzky, preso en el penal de Ushuaia. Consigue un uniforme, cruza la puerta y llega al muelle.','Relato inspirado en hechos reales; lo que ocurre dentro del penal es inventado.']},
+    {h:'CÓMO SE JUEGA',b:['Mover: joystick. Botón grande: hablar o abrir. No hay armas.','Si estás dentro del cono amarillo de un celador, sube la barra ATENCIÓN; si se llena, te descubren. Escóndete tras muros y cajas.']}
+  
   ],()=>startUshuaia(),'TOCA PARA EMPEZAR');
 }
 function celCfg(){ if(G.ep==='patagonia') return patCfg(); if(G.ep==='lorea') return {R:98,rate:1.2*([.85,1,1.25][G.diff]||1),half:.78}; if(G.ep==='falcon') return {R:104,rate:1.3*([.85,1,1.25][G.diff]||1),half:.8}; const disg=!!G.flags.uni&&!G.flags.alarma, dm=[.85,1,1.25][G.diff]||1; return {R:disg?48:100,rate:(disg?.65:1.25)*dm,half:disg?1:.78}; }
@@ -1260,7 +1262,7 @@ function fixSpawns(){
 function loadScreen(i,pos,noHeal){
   const S=SCREENS[i]; if(!G.ep&&(!G.chk||G.chk.ch!==S.ch||(S.boss&&G.chk.bossScr!==i&&!G.killed.has('boss')&&!G.killed.has('boss2')))){ try{ G.chk={ch:S.ch,s:saveData(i),bossScr:S.boss?i:-1}; }catch(e){} }
   buildWorld(S.ch);
-  enemies=[]; bullets=[]; parts=[]; fx=[]; pickups=[]; boss=null;
+  enemies=[]; bullets=[]; parts=[]; fx=[]; pickups=[]; boss=null; STAINS=[]; FL=[];
   WORLD.ids.forEach(j=>{
     const o=scrOrigin(j), SJ=SCREENS[j];
     SJ.enemies.forEach(d=>{
@@ -1371,10 +1373,68 @@ function moveEnt(e,dx,dy,hw,hh){
 /* ============ EFECTOS ============ */
 function burst(x,y,col,n){ for(let i=0;i<n;i++){ const a=Math.random()*6.28,s=.5+Math.random()*1.6; parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:18+Math.random()*14,col}); } }
 
+function bloodSpray(x,y,n,ang,spread,sp){
+  for(let i=0;i<n;i++){ const a=(ang===null?Math.random()*6.28:ang+(Math.random()-.5)*spread), v=(sp||1.4)*(.4+Math.random()*1.2); parts.push({x:x,y:y-3,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:16+Math.random()*22,col:BLOOD[(Math.random()*BLOOD.length)|0],sz:1+((Math.random()*3)|0)}); }
+}
+function addStains(x,y,n,spread,at){
+  for(let i=0;i<n;i++){ const sx0=x+(Math.random()-.5)*spread*2, sy0=y+(Math.random()-.4)*spread; if(solid(sx0,sy0)) continue; STAINS.push({k:'b',x:sx0,y:sy0,w:2+((Math.random()*6)|0),h:1+((Math.random()*3)|0),c:BLOOD[(Math.random()*BLOOD.length)|0],at:at||0}); }
+  while(STAINS.length>320) { const k=STAINS.findIndex(q=>q.k==='b'); STAINS.splice(k<0?0:k,1); }
+}
+function addCorpse(e){
+  STAINS.push({k:'c',x:e.x,y:e.y+3,col:enemyCol(e),sg:(e.kx>=0?1:-1),sc:e.type==='boss'?1.5:1,at:G.t+(e.type==='boss'?54:32)});
+  addStains(e.x,e.y+4,e.type==='boss'?20:12,e.type==='boss'?18:11,G.t+(e.type==='boss'?40:24));
+  while(STAINS.filter(q=>q.k==='c').length>16){ const i=STAINS.findIndex(q=>q.k==='c'); STAINS.splice(i,1); }
+}
+function lcol(o,f,d){ return (o&&typeof o==='object'&&o[f])||(typeof o==='string'?o:d); }
+function drawLimb(x,y,ty,o,flip,spin){
+  x=Math.round(x); y=Math.round(y);
+  const skin=lcol(o,'skin','#c79a6e'), sh=lcol(o,'shirt','#6a5a48'), pa=lcol(o,'pants','#3a2e22'), hat=lcol(o,'hat','#2e3a4d');
+  const v=spin; // 1 = girada
+  if(ty==='h'){ ctx.fillStyle=skin; ctx.fillRect(x-2,y-2,5,5); ctx.fillStyle=hat; ctx.fillRect(x-2,y-2,5,v?2:1); ctx.fillStyle='#c8312b'; ctx.fillRect(x-1+(flip?1:0),y+2,3,1); ctx.fillStyle='#1a1210'; ctx.fillRect(x+(flip?-1:1),y,1,1); }
+  else if(ty==='a'){ if(v){ ctx.fillStyle=sh; ctx.fillRect(x,y-3,2,3); ctx.fillStyle=skin; ctx.fillRect(x,y,2,3); ctx.fillStyle='#c8312b'; ctx.fillRect(x,y-4,2,1); } else { ctx.fillStyle=sh; ctx.fillRect(x+(flip?3:-3),y,3,2); ctx.fillStyle=skin; ctx.fillRect(x+(flip?-1:0),y,3,2); ctx.fillStyle='#c8312b'; ctx.fillRect(x+(flip?4:-4),y,1,2); } }
+  else { if(v){ ctx.fillStyle=pa; ctx.fillRect(x,y-3,2,4); ctx.fillStyle='#14100c'; ctx.fillRect(x,y+1,3,2); ctx.fillStyle='#c8312b'; ctx.fillRect(x,y-4,2,1); } else { ctx.fillStyle=pa; ctx.fillRect(x+(flip?-3:0),y,4,2); ctx.fillStyle='#14100c'; ctx.fillRect(x+(flip?-5:3),y,2,3); ctx.fillStyle='#c8312b'; ctx.fillRect(x+(flip?1:-1),y,1,2); } }
+}
+function dismember(x,y,o,ang,n,power){
+  const types=['h','a','a','l','l','h'];
+  for(let i=0;i<n;i++){
+    const a=(ang===null||Math.random()<.35)?Math.random()*6.28:ang+(Math.random()-.5)*1.4, v=(.9+Math.random()*1.5)*(power||1);
+    FL.push({x:x,y:y,hz:6+Math.random()*4,vx:Math.cos(a)*v,vy:Math.sin(a)*v*.8,vz:2.2+Math.random()*1.6,ty:(i===0&&Math.random()<.6)?'h':types[(Math.random()*types.length)|0],o:o,flip:Math.cos(a)<0,tt:0,b:0});
+  }
+  while(FL.length>30) FL.shift();
+}
+function updLimbs(){
+  FL=FL.filter(f=>{
+    f.tt++; const nx=f.x+f.vx, ny=f.y+f.vy; if(!solid(nx,f.y)) f.x=nx; else f.vx*=-.3; if(!solid(f.x,ny)) f.y=ny; else f.vy*=-.3;
+    f.hz+=f.vz; f.vz-=.3;
+    if(f.tt%3===0) parts.push({x:f.x,y:f.y-f.hz,vx:(Math.random()-.5)*.6,vy:(Math.random()-.5)*.6,life:14+Math.random()*10,col:BLOOD[(Math.random()*BLOOD.length)|0],sz:1+((Math.random()*2)|0)});
+    if(f.hz<=0){
+      if(f.b<1){ f.b++; f.hz=0; f.vz=-f.vz*.42; f.vx*=.55; f.vy*=.55; if(f.vz<1) f.vz=1; burst(f.x,f.y,'#a3141a',3); return true; }
+      STAINS.push({k:'l',x:f.x,y:f.y,ty:f.ty,col:f.o,flip:f.flip,at:0}); addStains(f.x,f.y+2,4,6); SFX.click&&0;
+      while(STAINS.filter(q=>q.k==='l').length>40){ const i=STAINS.findIndex(q=>q.k==='l'); STAINS.splice(i,1); }
+      return false;
+    }
+    return true;
+  });
+}
+function drawFlying(){ FL.forEach(f=>{ ctx.fillStyle='rgba(0,0,0,.25)'; ctx.fillRect(Math.round(f.x)-2,Math.round(f.y)+2,5,2); drawLimb(f.x,f.y-f.hz,f.ty,f.o,f.flip,Math.floor(f.tt/4)%2); }); }
+function drawStains(cx,cy){
+  const t=G.t;
+  STAINS.forEach(q=>{
+    if(q.at>t) return; if(q.x<cx-24||q.x>cx+W+24||q.y<cy-16||q.y>cy+PH+16) return;
+    if(q.k==='b'){ ctx.fillStyle=q.c; ctx.fillRect(Math.round(q.x-q.w/2),Math.round(q.y),q.w,q.h); }
+    else if(q.k==='l'){ ctx.fillStyle='#7a0f14'; ctx.fillRect(Math.round(q.x)-4,Math.round(q.y)+1,9,3); ctx.fillStyle='#a3141a'; ctx.fillRect(Math.round(q.x)-3,Math.round(q.y)+2,6,1); drawLimb(q.x,q.y,q.ty,q.col,q.flip,0); }
+    else { const x=Math.round(q.x), y=Math.round(q.y), sg=q.sg, k=q.sc;
+      ctx.fillStyle='#7a0f14'; ctx.fillRect(x-9*k,y-1,18*k,5*k); ctx.fillStyle='#a3141a'; ctx.fillRect(x-7*k,y,13*k,3*k);
+      ctx.fillStyle=lcol(q.col,'shirt','#6a5a48'); ctx.fillRect(Math.round(x-6*k),Math.round(y-3*k),Math.round(11*k),Math.round(5*k)); ctx.fillStyle='rgba(0,0,0,.25)'; ctx.fillRect(Math.round(x-6*k),Math.round(y),Math.round(11*k),Math.round(2*k));
+      ctx.fillStyle=lcol(q.col,'skin','#d9aa7a'); ctx.fillRect(Math.round(x+(sg>0?5:-9)*k),Math.round(y-3*k),Math.round(4*k),Math.round(4*k));
+      ctx.fillStyle=lcol(q.col,'pants','#2a1c14'); ctx.fillRect(Math.round(x+(sg>0?-10:5)*k),Math.round(y-2*k),Math.round(4*k),Math.round(2*k)); ctx.fillRect(Math.round(x+(sg>0?-10:5)*k),Math.round(y+1*k),Math.round(4*k),Math.round(2*k));
+      ctx.fillStyle='#c8312b'; ctx.fillRect(x-1,y-2,3,2); }
+  });
+}
 /* ============ JUGADOR ============ */
 function startDying(src){
   G.mode='dying'; G.dyT=0; P.inv=0; P.hp=0; G.cg=null; G.shake=8; SFX.fall();
-  G.killer=(src&&src.x!==undefined)?{x:src.x,y:src.y}:null; burst(P.x,P.y,'#c8312b',14);
+  G.killer=(src&&src.x!==undefined)?{x:src.x,y:src.y}:null; burst(P.x,P.y,'#c8312b',14); bloodSpray(P.x,P.y,40,null,0,2.6); addStains(P.x,P.y+5,16,14); dismember(P.x,P.y,playerCol(),src?Math.atan2(P.y-src.y,P.x-src.x):null,4,1.1);
 }
 function updDying(){
   G.dyT++; updParts();
@@ -1392,7 +1452,7 @@ function hurtPlayer(src){
   if(G.allies.length){
     const a=G.allies.pop(); P.inv=80; SFX.fall(); burst(a.x,a.y,'#c8312b',12); toast(a.name.toUpperCase()+' CAYÓ POR TI');
   } else {
-    P.hp--; P.inv=70; SFX.hurt(); burst(P.x,P.y,'#c8312b',8);
+    P.hp--; P.inv=70; SFX.hurt(); burst(P.x,P.y,'#c8312b',8); bloodSpray(P.x,P.y,12,Math.atan2(sy,sx),1.2,2); addStains(P.x,P.y+5,4,9);
     if(P.hp<=0){ startDying(src); }
   }
 }
@@ -1403,6 +1463,7 @@ function addHarsh(n){ const o=G.harsh; G.harsh+=n; if(o<3&&G.harsh>=3) toast('LO
 function hitFx(e,sx,sy,dmg){
   const l=Math.hypot(sx,sy)||1, ux=sx/l, uy=sy/l, base=Math.atan2(uy,ux);
   for(let i=0;i<7;i++){ const a=base+(Math.random()-.5)*1.2, sp=.9+Math.random()*1.6; parts.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:14+Math.random()*10,col:i%2?'#fff3c4':'#ffd45a',sz:2,fade:true}); }
+  bloodSpray(e.x,e.y,9,base,1.1,2); addStains(e.x+ux*6,e.y+5,3,8);
   fx.push({k:'slash',x:e.x-ux*4,y:e.y-uy*4,ang:base,t:0,max:7});
   fx.push({k:'num',x:e.x,y:e.y-12,txt:String(Math.round(dmg)),t:0,max:34});
 }
@@ -1443,7 +1504,7 @@ function damageEnemy(e,dmg,sx,sy,src){
   return true;
 }
 function killEnemy(e){
-  enemies=enemies.filter(x=>x!==e); G.killed.add(e.id); burst(e.x,e.y,'#d8c35a',10); SFX.fall();
+  enemies=enemies.filter(x=>x!==e); G.killed.add(e.id); burst(e.x,e.y,'#d8c35a',10); SFX.fall(); if(e.type!=='mg'){ bloodSpray(e.x,e.y,e.type==='boss'?40:24,null,0,2.4); addCorpse(e); dismember(e.x,e.y,enemyCol(e),Math.atan2(e.ky||0,e.kx||1),e.type==='boss'?7:3,e.type==='boss'?1.3:1); G.shake=Math.max(G.shake,5); }
   if(e.type!=='mg') fx.push({k:'fall',x:e.x,y:e.y,o:enemyCol(e),dir:e.dir,sc:e.type==='boss'?1.7:1,sg:(e.kx>=0?1:-1),t:0,max:e.type==='boss'?54:32});
   if(e.type==='boss') fx.push({k:'ring',x:e.x,y:e.y,t:0,max:34});
   if(e.type==='boss'){ bossDown(e); return; }
@@ -2000,10 +2061,9 @@ function upgCheck(){
 function showHint(){ const o=objective(); G.arrowT=720; startDialog([['OBJETIVO',o.long]],()=>{ if(guideDir(o.targets)) toast('UNA FLECHA TE GUÍA UNOS SEGUNDOS'); }); }
 function startHowTo(next,lastLabel){
   startCard([
-    {h:'OBJETIVO',art:'flag',b:['Eres Inés, del Partido Liberal Mexicano. Reúne compañeros, consigue llaves y derrota a los jefes que mandan en el valle y en la frontera.']},
-    {h:'CONTROLES',b:['Mover: joystick o flechas.','Botón grande: hablar, usar o el objeto elegido (PC: E y Z).','ARMA: un toque cambia de arma; mantenerlo abre el menú (PC: Q y Tab).','Cruz roja +: mantenla medio segundo para curarte con una venda (PC: R).','Ayuda: toca el objetivo o pulsa H.']},
-    {h:'CÓMO SE JUEGA',b:['Habla con los vecinos llevando un ejemplar de Regeneración para sumarlos. A los soldados se les derrota: no hay trato con ellos. Los escudos se rodean. Los muros agrietados se rompen de un disparo de carabina y esconden recompensas. Los jefes se pelean en tiempo real: esquiva sus golpes y ataca cuando se abran.']},
-    {h:'CONSEJOS',b:['Tu objetivo aparece arriba a la izquierda al entrar a cada zona y luego queda una banderita. Si te atoras, tócala o pulsa H: te explica qué hacer y una flecha marca la salida unos segundos. Busca llaves y páginas de Regeneración.']}
+    {h:'OBJETIVO',art:'flag',b:['Eres Inés, del Partido Liberal Mexicano. Reúne compañeros, consigue llaves y derrota a los jefes del valle y la frontera.']},
+    {h:'CÓMO SE JUEGA',b:['Mover: joystick. Botón grande: hablar o usar. ARMA: toque cambia, mantener abre menú. Cruz roja +: mantén para curar.','Habla con vecinos con un ejemplar de Regeneración para sumarlos. Si te atoras, toca el objetivo.']}
+  
   ],next||(()=>{ G.mode='title'; }),lastLabel);
 }
 let lockMsgT=0;
@@ -2025,7 +2085,7 @@ function checkLocks(){
     }
   }
 }
-function updParts(){ fx=fx.filter(f=>++f.t<f.max); parts=parts.filter(p=>{ p.x+=p.vx; p.y+=p.vy; p.vx*=.93; p.vy*=.93; return --p.life>0; }); }
+function updParts(){ updLimbs(); fx=fx.filter(f=>++f.t<f.max); parts=parts.filter(p=>{ p.x+=p.vx; p.y+=p.vy; p.vx*=.93; p.vy*=.93; return --p.life>0; }); }
 function updPlay(){
   if(pressed.hint) showHint();
   if(pressed.menu) openMenu();
@@ -2150,7 +2210,7 @@ function campRun(a){
   if(a==='cont'){ continueGame(); return; }
   const go=()=>{
     if(a==='new'){ clearSave(); G.hasSave=false; startHowTo(()=>newGame(),'TOCA PARA EMPEZAR'); return; }
-    if(n.id==='cananea') startHowTo(()=>startMineIntro(),'TOCA PARA SEGUIR');
+    if(n.id==='cananea') startMineIntro();
     else if(n.id==='lorea') loreaHowTo(); else if(n.id==='falcon') falconHowTo(); else if(n.id==='ushuaia') ushHowTo(); else if(n.id==='huelga') patHowTo(); else if(n.id==='persecucion') patBHowTo(); else if(n.id==='wilckens') patCHowTo();
   };
   openSetup(go,n.name);
@@ -3736,6 +3796,7 @@ function drawWorld(){
   ctx.save(); ctx.translate(-cx,-cy);
   ANIM.forEach(a=>{ if(vis(a[1]*T+8,a[2]*T+8,26)){ TS=scrAt(a[1],a[2]); animTile(a[0],a[1],a[2]); } });
   if(G.fxLevel) drawTufts(cx,cy);
+  drawStains(cx,cy);
   PRESS.forEach(q=>{ if(Math.hypot(q.x-P.x,q.y-P.y)<30) bubble(q.x,q.y-20); });
   if(G.ep==='ushuaia'){ drawGoleta(); }
   if(G.ep==='ushuaia'||G.ep==='falcon'||G.ep==='lorea'||G.ep==='patagonia'){ enemies.forEach(e=>{ if(e.type==='celador'&&vis(e.x,e.y,90)) drawCone(e); }); }
@@ -3743,6 +3804,7 @@ function drawWorld(){
   if(G.ep==='falcon') drawFalcon();
   const list=[]; npcs.forEach(n=>{ if(vis(n.x,n.y,30)) list.push([n.y,()=>drawNpc(n)]); }); G.allies.forEach(a=>list.push([a.y,()=>drawAlly(a)])); enemies.forEach(e=>{ if(vis(e.x,e.y,40)) list.push([e.y,()=>drawEnemy(e)]); }); list.push([P.y,drawPlayer]);
   list.sort((a,b)=>a[0]-b[0]).forEach(l=>l[1]());
+  drawFlying();
   if(G.ep==='patagonia'){ drawPatB(cx,cy); if(G.pat&&G.pat.part===3){ if(G.scr===66) patCMarker(); patCCoin(); } }
   bullets.forEach(b=>{
     const col=b.from==='e'?'#ff6a3a':'#fbe39a';
@@ -4114,15 +4176,15 @@ CAMPS.pat={name:'CAMPAÑA PATAGONIA',sub:'1920 - 1923',nodes:[
   {id:'wilckens',name:'WILCKENS',year:'1923',x:190,y:92,desc:['Llega sin que te vean.','Si te ven, reintentas.']}]};
 function patHowTo(){
   startCard([
-    {h:'OBJETIVO',b:['Eres Eusebio, peón de Santa Cruz. Visita las tres estancias, suma gente y llega a El Tero.']},
-    {h:'CONTROLES',b:['Mover: joystick o flechas.','Botón grande: mantenlo para GALOPAR. Junto a alguien, un toque habla. (PC: Z y E)']},
-    {h:'CÓMO SE JUEGA',b:['Galopar gasta la barra CABALLO y hace más ruido. Evita los conos amarillos.','En cada estancia eliges: hablar con los peones o tomar el casco.']}
+    {h:'OBJETIVO',b:['Eres Eusebio, peón de Santa Cruz. Visita las tres estancias, suma gente y llega a El Tero.','Relato inspirado en hechos reales.']},
+    {h:'CÓMO SE JUEGA',b:['Mover: joystick. Botón grande: mantén para GALOPAR; junto a alguien, habla.','Galopar gasta la barra CABALLO. Evita los conos amarillos. En cada estancia: hablar con los peones o tomar el casco.']}
+  
   ],()=>startPatagonia(),'TOCA PARA EMPEZAR');
 }
 function startPatagonia(){
   resetState(); G.ep='patagonia'; G.flags.intro=true; P.hasMachete=false; P.hp=3; P.maxhp=3; P.copies=0; G.susMax=0; G.overMsg=null; patInit();
   loadScreen(47,[24,104],true); G.mode='play';
-  startDialog([['','SANTA CRUZ, NOVIEMBRE DE 1920.'],['','Huelga general en la Patagonia. Un relato inspirado en hechos reales.'],['Eusebio','A ver cuántos nos acompañan.']]);
+  startDialog([['','SANTA CRUZ, NOVIEMBRE DE 1920. Huelga general en la Patagonia.']]);
 }
 function patEstancia(k){
   const p=G.pat; if(!p) return;
@@ -4266,14 +4328,14 @@ function patBInit(){
 }
 function patBHowTo(){
   startCard([
-    {h:'OBJETIVO',b:['Eres Eusebio. La caballería te persigue. Dispara, esquiva y derriba al capitán.']},
-    {h:'CONTROLES',b:['Mover: joystick o flechas.','Botón grande: mantenlo para DISPARAR. (PC: Z)']},
-    {h:'CÓMO SE JUEGA',b:['El camino avanza solo. Esquiva balas y jinetes. Cada golpe te quita una vida y gente de la columna.']}
+    {h:'SANTA CRUZ, 1921',b:['Los patrones no cumplieron el acuerdo y la huelga se reanudó. Eres Eusebio y la caballería te persigue. Relato inspirado en hechos reales.']},
+    {h:'CÓMO SE JUEGA',b:['Mover: joystick. Botón grande: mantén para DISPARAR.','El camino avanza solo. Esquiva balas y jinetes y derriba al capitán. Cada golpe te quita una vida y gente de la columna.']}
+  
   ],()=>startPatB(),'TOCA PARA EMPEZAR');
 }
 function startPatB(){
   resetState(); G.ep='patagonia'; G.flags.intro=true; P.hasMachete=false; P.hp=3; P.maxhp=3; P.copies=0; G.susMax=0; G.overMsg=null; patBInit(); G.mode='play';
-  startCard([{h:'SANTA CRUZ, 1921',b:['Los patrones no cumplieron el acuerdo y la huelga se reanudó. El ejército avanza. Un relato inspirado en hechos reales.']}],()=>{ rdNew(false); G.mode='ride'; },'TOCA PARA GALOPAR');
+  rdNew(false); G.mode='ride';
 }
 function patBRespawn(){}
 function patBSpeed(){ const k=Math.max(0,G.scr-54), dm=[.9,1,1.1][G.diff]||1; return (1.10+.045*k)*dm; }
@@ -4362,10 +4424,12 @@ function rdNew(fromBoss){
   if(cp) RD.evi=RD.ev.length;
 }
 function rdBurst(x,y,col,n){ for(let i=0;i<n;i++){ const a=Math.random()*6.28,v=.5+Math.random()*1.8; RD.pt.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:16+Math.random()*14,col:col,sz:2}); } }
+function rdLimbs(x,y,n,o){ for(let i=0;i<n;i++){ const a=Math.random()*6.28,v=.8+Math.random()*2; const ty=['h','a','a','l','l'][(Math.random()*5)|0]; RD.pt.push({x:x,y:y-6,vx:Math.cos(a)*v-.8,vy:-1.5-Math.random()*1.5,g:.16,life:50+Math.random()*30,col:'#000',ty:ty,o:o,limb:1,sz:2}); } }
+function rdBlood(x,y,n){ for(let i=0;i<n;i++){ const a=Math.random()*6.28,v=.6+Math.random()*2.2; RD.pt.push({x:x,y:y-4,vx:Math.cos(a)*v-.6,vy:Math.sin(a)*v-1,g:.14,life:22+Math.random()*20,col:BLOOD[(Math.random()*BLOOD.length)|0],sz:1+((Math.random()*3)|0)}); } }
 function rdHurt(){
   const R=RD; if(R.inv>0||R.state==='dead'||R.state==='dying'||R.state==='grab'||R.state==='caught') return;
-  R.hp--; R.hits++; R.inv=80; R.flash=8; G.shake=8; SFX.hurt(); rdBurst(R.px,R.py,'#c8312b',10);
-  if(R.hp<=0){ R.hp=0; R.state='dying'; R.dT=0; SFX.fall(); }
+  R.hp--; R.hits++; R.inv=80; R.flash=8; G.shake=8; SFX.hurt(); rdBurst(R.px,R.py,'#c8312b',10); rdBlood(R.px,R.py,16);
+  if(R.hp<=0){ R.hp=0; R.state='dying'; R.dT=0; SFX.fall(); rdBlood(R.px,R.py,30); rdLimbs(R.px,R.py,4,playerCol()); }
 }
 function rdShot(x,y,tx,ty,sp,spread){
   const a=Math.atan2(ty-y,tx-x)+(spread||0); RD.eb.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp});
@@ -4374,10 +4438,10 @@ function updRide(){
   const R=RD; if(!R) return;
   const dm=[.8,1,1.25][G.diff]||1;
   if(R.state==='dead'){ if(pressed.act||pressed.atk||pressed.ctx){ SFX.click(); const h=R.hits; rdNew(!!(R.cp||R.bossSeen)); RD.hits=(RD.cp?h:0); } return; }
-  if(R.state==='dying'){ R.dT++; R.pt.forEach(q=>{ q.x+=q.vx; q.y+=q.vy; q.life--; }); R.pt=R.pt.filter(q=>q.life>0); if(R.dT>=75) R.state='dead'; return; }
+  if(R.state==='dying'){ R.dT++; R.pt.forEach(q=>{ q.x+=q.vx; q.y+=q.vy; if(q.g) q.vy+=q.g; q.life--; }); R.pt=R.pt.filter(q=>q.life>0); if(R.dT>=75) R.state='dead'; return; }
   R.t++; R.anim++;
   if(R.inv>0) R.inv--; if(R.flash>0) R.flash--;
-  R.pt.forEach(q=>{ q.x+=q.vx; q.y+=q.vy; q.life--; }); R.pt=R.pt.filter(q=>q.life>0);
+  R.pt.forEach(q=>{ q.x+=q.vx; q.y+=q.vy; if(q.g) q.vy+=q.g; q.life--; }); R.pt=R.pt.filter(q=>q.life>0);
   if(R.state==='caught'){ R.endT++; if(R.endT===1){ G.shake=14; SFX.fall(); } if(R.endT>=80){ R.state='done'; G.pat.col=Math.max(4,10-R.hits); G.pat.lost=R.hits; patBFinale(); } return; }
   const bs=R.boss;
   if(R.state==='run'||R.state==='boss'){
@@ -4411,10 +4475,10 @@ function updRide(){
   R.pb.forEach(b=>{ b.x+=4.4; });
   R.pb=R.pb.filter(b=>{
     if(b.x>W+6) return false;
-    for(const e of R.en){ const w=e.k==='c'?24:12, h=e.k==='c'?12:9; if(e.hp>0&&Math.abs(b.x-(e.k==='c'?e.x+4:e.x))<w&&Math.abs(b.y-e.y)<h){ e.hp--; e.hf=6; SFX.hit(); rdBurst(b.x,b.y,'#e0b84a',3); return false; } }
+    for(const e of R.en){ const w=e.k==='c'?24:12, h=e.k==='c'?12:9; if(e.hp>0&&Math.abs(b.x-(e.k==='c'?e.x+4:e.x))<w&&Math.abs(b.y-e.y)<h){ e.hp--; e.hf=6; SFX.hit(); rdBurst(b.x,b.y,'#e0b84a',3); if(e.k!=='c') rdBlood(e.x,e.y,8); return false; } }
     if(bs&&bs.st!=='enter'&&bs.hp>0&&Math.abs(b.x-bs.x)<16&&Math.abs(b.y-bs.y)<14){ bs.hp--; bs.hf=6; SFX.hit(); rdBurst(b.x,b.y,'#e0b84a',3); if(bs.hp<=0){ bs.hp=0; R.state='grab'; R.eb=[]; R.en.forEach(e=>{ e.hp=0; }); } return false; }
     return true; });
-  R.en=R.en.filter(e=>{ if(e.hp<=0){ R.kills++; SFX.fall(); rdBurst(e.x,e.y,e.k==='c'?'#6a4a2a':'#8a4a2a',e.k==='c'?16:10); return false; } return e.x>-50; });
+  R.en=R.en.filter(e=>{ if(e.hp<=0){ R.kills++; SFX.fall(); rdBurst(e.x,e.y,e.k==='c'?'#6a4a2a':'#8a4a2a',e.k==='c'?16:10); rdBlood(e.x,e.y,e.k==='c'?20:32); if(e.k!=='c') rdLimbs(e.x,e.y,3,COL.policia); else rdLimbs(e.x,e.y,2,COL.policia); G.shake=Math.max(G.shake,3); return false; } return e.x>-50; });
   // balas enemigas
   R.eb.forEach(b=>{ b.x+=b.vx; b.y+=b.vy; });
   R.eb=R.eb.filter(b=>{ if(b.x<-8||b.x>W+8||b.y<HUD||b.y>H+8) return false; if(Math.abs(b.x-R.px)<7&&Math.abs(b.y-R.py)<7){ rdHurt(); return false; } return true; });
@@ -4478,7 +4542,7 @@ function drawRide(){
   dr.sort((a,b)=>a.y-b.y).forEach(d=>d.f());
   ctx.fillStyle='#fff3b0'; R.pb.forEach(b=>{ ctx.fillRect(Math.round(b.x)-4,Math.round(b.y),7,2); });
   ctx.fillStyle='#e0372b'; R.eb.forEach(b=>{ ctx.fillRect(Math.round(b.x)-2,Math.round(b.y)-2,4,4); ctx.fillStyle='#ffd0a0'; ctx.fillRect(Math.round(b.x)-1,Math.round(b.y)-1,2,2); ctx.fillStyle='#e0372b'; });
-  R.pt.forEach(q=>{ ctx.fillStyle=q.col; ctx.fillRect(Math.round(q.x),Math.round(q.y),q.sz,q.sz); });
+  R.pt.forEach(q=>{ if(q.limb){ drawLimb(q.x,q.y,q.ty,q.o,q.vx<0,Math.floor(q.life/4)%2); } else { ctx.fillStyle=q.col; ctx.fillRect(Math.round(q.x),Math.round(q.y),q.sz,q.sz); } });
   ctx.restore();
   drawRideHud();
   if(R.t<240&&R.state==='run'){ text('MANTÉN PARA DISPARAR',128,H-6,'#3a2a1c','center'); }
@@ -4530,16 +4594,44 @@ function mineNew(){
 function mineSolid(c,r){ const M=MP; if(c<0||c>=MN_W) return true; if(r<0) return true; if(r>=13) return false; const t=M.g[r][c]; return t==='#'||t==='='; }
 function mineHit(x,y){ const c0=Math.floor((x-5)/16), c1=Math.floor((x+4)/16), r0=Math.floor((y-8)/16), r1=Math.floor((y+7)/16); for(let r=r0;r<=r1;r++) for(let c=c0;c<=c1;c++) if(mineSolid(c,r)) return true; return false; }
 function mineBurst(x,y,col,n){ for(let i=0;i<n;i++){ const a=Math.random()*6.28,v=.6+Math.random()*1.6; MP.pt.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-.6,life:16+Math.random()*12,col:col}); } }
+function mineBlood(x,y,n,big){
+  for(let i=0;i<n;i++){ const a=Math.random()*6.28,v=.6+Math.random()*(big?2.6:1.8); MP.pt.push({x:x,y:y-3,vx:Math.cos(a)*v,vy:Math.sin(a)*v-1.2,life:22+Math.random()*22,col:BLOOD[(Math.random()*BLOOD.length)|0]}); }
+}
+function mineStain(x,n,spread,corpse,col){
+  const M=MP; if(!M.st) M.st=[];
+  const gnd=(px)=>{ const c=Math.floor(px/16); return c>=0&&c<MN_W&&M.g[10][c]==='#'; };
+  for(let i=0;i<n;i++){ const px=x+(Math.random()-.5)*spread*2, w=2+((Math.random()*6)|0); if(!gnd(px-w/2)||!gnd(px+w/2)) continue; M.st.push({k:'b',x:px,y:158+((Math.random()*3)|0),w:w,h:1+((Math.random()*2)|0),c:BLOOD[(Math.random()*BLOOD.length)|0]}); }
+  if(corpse&&gnd(x-10)&&gnd(x+10)) M.st.push({k:'c',x:x,y:157,col:col});
+  while(M.st.length>120) M.st.shift();
+}
+function mineLimbs(x,y,n,o){
+  const M=MP; if(!M.lb) M.lb=[];
+  for(let i=0;i<n;i++){ const a=Math.random()*6.28,v=.8+Math.random()*1.6; M.lb.push({x:x,y:y-4,vx:Math.cos(a)*v,vy:-2.8-Math.random()*2,ty:['h','a','a','l','l'][(Math.random()*5)|0],o:o,tt:0,b:0}); }
+  while(M.lb.length>24) M.lb.shift();
+}
+function updMineLimbs(){
+  const M=MP; if(!M.lb) return;
+  M.lb=M.lb.filter(f=>{
+    f.tt++; f.vy+=.3; f.x+=f.vx; f.y+=f.vy; if(f.tt%3===0) M.pt.push({x:f.x,y:f.y,vx:0,vy:.2,life:12,col:BLOOD[(Math.random()*BLOOD.length)|0]});
+    if(f.y>260) return false;
+    const c=Math.floor(f.x/16);
+    if(f.vy>0&&f.y>=157&&f.y<=170&&c>=0&&c<MN_W&&M.g[10][c]==='#'){
+      if(f.b<1){ f.b++; f.y=157; f.vy=-f.vy*.4; f.vx*=.5; return true; }
+      if(!M.st) M.st=[]; M.st.push({k:'l',x:f.x,y:157,ty:f.ty,col:f.o,flip:f.vx<0}); mineStain(f.x,3,5); return false;
+    }
+    return true;
+  });
+}
 function mineHurt(fromX,fromY){
   const M=MP; if(M.inv>0||M.state!=='run') return;
-  M.hp--; M.inv=90; M.flash=8; G.shake=6; SFX.hurt(); mineBurst(M.x,M.y,'#c8312b',8);
+  M.hp--; M.inv=90; M.flash=8; G.shake=6; SFX.hurt(); mineBurst(M.x,M.y,'#c8312b',8); mineBlood(M.x,M.y,10); 
   if(M.hp<=0){ mineDie(fromX,fromY); return; }
   M.kb=14; M.vx=(M.x<fromX?-1:1)*2.2; M.vy=-4; M.onPl=null;
 }
 function mineDie(kx,ky){
   const M=MP; if(M.state!=='run') return;
   M.state='dying'; M.dT=0; M.vy=-5.2; M.vx=0; M.kb=0; M.onPl=null; M.killer=(kx===undefined||kx===null)?null:{x:kx,y:ky===undefined?M.y:ky}; M.carts=M.carts||[];
-  SFX.hurt(); mineBurst(M.x,M.y,'#c8312b',14); G.shake=8;
+  SFX.hurt(); mineBurst(M.x,M.y,'#c8312b',14); mineBlood(M.x,M.y,36,true); mineStain(M.x,14,12); mineLimbs(M.x,M.y,4,COL.player); G.shake=8;
 }
 function mineRespawn(full){
   const M=MP, c=M.cp>=0?MN_CPS[M.cp]:2; M.x=c*16+8; M.y=152; M.vx=0; M.vy=0; M.kb=0; M.inv=90; M.carts=[]; M.deaths++; M.onPl=null; M.state='run'; M.fadeIn=24; M.cam=Math.max(0,M.x-100);
@@ -4549,7 +4641,7 @@ function mineRespawn(full){
 function updMine(){
   const M=MP; if(!M) return; M.t++; M.anim++;
   if(M.inv>0) M.inv--; if(M.flash>0) M.flash--;
-  M.pt.forEach(q=>{ q.x+=q.vx; q.y+=q.vy; q.vy+=.12; q.life--; }); M.pt=M.pt.filter(q=>q.life>0);
+  M.pt.forEach(q=>{ q.x+=q.vx; q.y+=q.vy; q.vy+=.12; q.life--; }); M.pt=M.pt.filter(q=>q.life>0); updMineLimbs();
   if(M.state==='dying'){
     M.dT++; if(M.dT>8){ M.vy=Math.min(7,M.vy+.32); M.y+=M.vy; }
     if(M.dT>=85){ mineRespawn(M.hp<=0); }
@@ -4588,12 +4680,12 @@ function updMine(){
   M.gems.forEach(q=>{ if(!q.got&&Math.abs(M.x-q.x)<9&&Math.abs(M.y-q.y)<12){ q.got=true; M.gm++; SFX.click(); mineBurst(q.x,q.y,'#e0955a',3); } });
   M.en.forEach(e=>{ if(!e.alive) return; e.x+=e.dir*.55; if(e.x<e.a){ e.x=e.a; e.dir=1; } if(e.x>e.b){ e.x=e.b; e.dir=-1; }
     if(Math.abs(M.x-e.x)<11&&Math.abs(M.y-e.y)<15){
-      if(M.vy>0&&M.y+8<e.y+4){ e.alive=false; M.vy=-4.6; M.kills++; SFX.hit(); mineBurst(e.x,e.y,'#8a5a32',10); }
+      if(M.vy>0&&M.y+8<e.y+4){ e.alive=false; M.vy=-4.6; M.kills++; SFX.hit(); mineBurst(e.x,e.y,'#8a5a32',10); mineBlood(e.x,e.y,26,true); mineStain(e.x,10,10,true,'#5a4632'); mineLimbs(e.x,e.y,3,COL.capataz); }
       else mineHurt(e.x,e.y);
     } });
   M.bats.forEach(b=>{ if(!b.alive) return; b.t++; b.x=b.bx+Math.sin(b.t*.025)*b.r; b.y=b.by+Math.sin(b.t*.07)*14;
     if(Math.abs(M.x-b.x)<11&&Math.abs(M.y-b.y)<12){
-      if(M.vy>1&&M.y<b.y){ b.alive=false; M.vy=-5; M.kills++; SFX.hit(); mineBurst(b.x,b.y,'#3a3040',10); }
+      if(M.vy>1&&M.y<b.y){ b.alive=false; M.vy=-5; M.kills++; SFX.hit(); mineBurst(b.x,b.y,'#3a3040',10); mineBlood(b.x,b.y,16); }
       else mineHurt(b.x,b.y);
     } });
   const col=Math.floor(M.x/16), cx=Math.round(M.cam);
@@ -4618,9 +4710,8 @@ function mineEnd(){
 }
 function startMineIntro(){
   startCard([
-    {h:'LA MINA',b:['Antes de la huelga cruzas la mina de Cananea. Esta escena es inventada para el juego.']},
-    {h:'CONTROLES',b:['Mover: joystick o flechas.','Botón grande: SALTAR. Mantenlo para saltar más alto. (PC: Z)']},
-    {h:'CÓMO SE JUEGA',b:['Salta sobre capataces y murciélagos. Evita púas, vagonetas y rocas. Los resortes te lanzan alto. Junta cobre y ejemplares de Regeneración: los ejemplares los llevarás a la superficie.']}
+    {h:'LA MINA',b:['Antes de la huelga cruzas la mina de Cananea. Escena inventada para el juego. Junta cobre y ejemplares de Regeneración: los llevarás a la superficie.']},
+    {h:'CÓMO SE JUEGA',b:['Mover: joystick. Botón grande: SALTAR; mantenlo para saltar más alto.','Salta sobre capataces y murciélagos. Evita púas, vagonetas y rocas. Los resortes te lanzan alto.']}
   ],()=>{ mineNew(); G.mode='plat'; },'TOCA PARA EMPEZAR');
 }
 function drawMine(){
@@ -4663,9 +4754,14 @@ function drawMine(){
   // murciélagos
   M.bats.forEach(b=>{ if(!b.alive) return; const x=Math.round(b.x-cx), y=HUD+Math.round(b.y); if(x<-14||x>W+14) return; const fl=Math.floor(M.t/6)%2; ctx.fillStyle='#2a2230'; ctx.fillRect(x-3,y-2,6,5); ctx.fillStyle='#3a3040'; if(fl){ ctx.fillRect(x-10,y-5,7,3); ctx.fillRect(x+3,y-5,7,3); } else { ctx.fillRect(x-10,y,7,3); ctx.fillRect(x+3,y,7,3); } ctx.fillStyle='#e0372b'; ctx.fillRect(x-2,y-1,1,1); ctx.fillRect(x+1,y-1,1,1); });
   // capataces
+  (M.st||[]).forEach(q=>{ const x=Math.round(q.x-cx); if(x<-20||x>W+20) return;
+    if(q.k==='b'){ ctx.fillStyle=q.c; ctx.fillRect(x-Math.round(q.w/2),HUD+Math.round(q.y),q.w,q.h); }
+    else if(q.k==='l'){ ctx.fillStyle='#7a0f14'; ctx.fillRect(x-4,HUD+Math.round(q.y)+1,9,3); ctx.fillStyle='#a3141a'; ctx.fillRect(x-3,HUD+Math.round(q.y)+2,6,1); drawLimb(x,HUD+Math.round(q.y),q.ty,q.col,q.flip,0); }
+    else { const y=HUD+Math.round(q.y); ctx.fillStyle='#7a0f14'; ctx.fillRect(x-9,y,18,4); ctx.fillStyle='#a3141a'; ctx.fillRect(x-7,y+1,13,2); ctx.fillStyle=q.col; ctx.fillRect(x-6,y-3,11,4); ctx.fillStyle='#d9aa7a'; ctx.fillRect(x+5,y-3,4,4); ctx.fillStyle='#2a1c14'; ctx.fillRect(x-10,y-2,4,3); ctx.fillStyle='#c8312b'; ctx.fillRect(x-1,y-2,3,2); } });
   M.en.forEach(e=>{ if(!e.alive) return; const x=Math.round(e.x-cx); if(x<-20||x>W+20) return; person(x,HUD+Math.round(e.y),e.dir>0?'right':'left',COL.capataz,M.t,true,false,1); });
   // jugador
   if(!(M.inv>0&&Math.floor(M.inv/4)%2&&M.state==='run')) person(Math.round(M.x-cx),HUD+Math.round(M.y),M.face>0?'right':'left',COL.player,M.anim,Math.abs(M.vx)>.1&&M.ground,false,1);
+  (M.lb||[]).forEach(f=>{ drawLimb(f.x-cx,HUD+f.y,f.ty,f.o,f.vx<0,Math.floor(f.tt/4)%2); });
   M.pt.forEach(q=>{ ctx.fillStyle=q.col; ctx.fillRect(Math.round(q.x-cx),HUD+Math.round(q.y),2,2); });
   if(M.state==='dying'){
     if(M.killer&&M.dT<60){ const kx=Math.round(M.killer.x-cx), ky=HUD+Math.round(M.killer.y), rr=12+Math.floor(M.dT/4)%3*2; ctx.strokeStyle=(Math.floor(M.dT/5)%2)?'#ffffff':'#e0372b'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(kx,ky,rr,0,6.3); ctx.stroke(); }
@@ -4713,15 +4809,15 @@ COL.wilckens={style:'cap',hat:'#2b2b30',shirt:'#6b6f78',pants:'#2e2a28',skin:'#e
 function patCInit(){ G.pat={part:3,col:1,st:100,stMax:100,tired:false,gal:false,soto:0,fonte:0,done:[false,false,false],fin:false,coins:6,coin:null,cd:0}; }
 function patCHowTo(){
   startCard([
-    {h:'OBJETIVO',b:['Eres Kurt Wilckens, anarquista alemán. Cruza las calles de Buenos Aires hasta la casa del teniente coronel Varela.']},
-    {h:'CONTROLES',b:['Mover: joystick o flechas.','Botón grande: tirar moneda (PC: Z o E).']},
-    {h:'CÓMO SE JUEGA',b:['Evita los conos amarillos y escóndete tras las cajas. Botón grande: tirar una moneda lejos para distraer a los guardias (tienes 6). Si te ven, repites la pantalla.']}
+    {h:'OBJETIVO',b:['Eres Kurt Wilckens, anarquista alemán. Cruza las calles de Buenos Aires hasta la casa del teniente coronel Varela, que dirigió los fusilamientos en la Patagonia.','Relato inspirado en hechos reales.']},
+    {h:'CÓMO SE JUEGA',b:['Mover: joystick. Botón grande: tirar moneda.','Evita los conos amarillos y escóndete tras las cajas. Tira una moneda lejos para distraer a los guardias (tienes 6). Si te ven, repites la pantalla.']}
+  
   ],()=>startPatC(),'TOCA PARA EMPEZAR');
 }
 function startPatC(){
   resetState(); G.ep='patagonia'; G.flags.intro=true; P.hasMachete=false; P.hp=3; P.maxhp=3; P.copies=0; G.susMax=0; G.overMsg=null; patCInit();
   loadScreen(62,[24,104],true); G.mode='play';
-  startDialog([['','BUENOS AIRES, ENERO DE 1923.'],['','Un anarquista alemán busca al teniente coronel Varela, que dirigió los fusilamientos en la Patagonia. Un relato inspirado en hechos reales.'],['Wilckens','Tengo que llegar sin que me vean.']]);
+  startDialog([['','BUENOS AIRES, ENERO DE 1923. Wilckens busca al teniente coronel Varela.']]);
 }
 function patCThrow(){
   const p=G.pat; if(p.cd>0||p.coin) return; if(p.coins<=0){ toast('NO TE QUEDAN MONEDAS'); SFX.click(); p.cd=40; return; }
